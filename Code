@@ -1,0 +1,79 @@
+import time
+import os
+import urllib.parse
+import base64
+import requests
+import json
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from urllib.parse import urlparse, parse_qs
+
+CLIENT_SECRET = 'iSYlWfHgIBb4aE3dOpASB22PQwhGgU9l'
+CLIENT_ID = '2B30j8heMnPmmvjxvAp38jn8t364pm0r'
+REDIRECT_URI = 'https://www.google.com/'
+#STATE = "random_string"
+API_URL = 'https://api.contaazul.com'
+CODE = 'MYRwB1QHQNFIvBFTLif1BIy5P2gdAOc6&state=iSYlWfHgIBb4aE3dOpASB22PQwhGgU9l'
+
+def authorize():
+    url = f"https://api.contaazul.com/auth/authorize?redirect_uri={REDIRECT_URI}&client_id={CLIENT_ID}&scope=sales&state={CLIENT_SECRET}"
+    print (url)
+    # Configurar o navegador (no exemplo, estou usando o Chrome)
+    driver = webdriver.Chrome()
+    # Abrir a página da web
+    driver.get(url)
+    # Encontrar o botão por seu XPath, CSS selector, ou outro método
+    # Neste exemplo, estou usando XPath para encontrar o botão pelo texto
+    botao = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Autorizar')]")))
+    # Pegar a URL atual antes de clicar no botão
+    url_anterior = driver.current_url
+    # Clicar no botão
+    botao.click()
+    # Esperar até que a URL mude após o clique
+    WebDriverWait(driver, 10).until(EC.url_changes(url_anterior))
+    # Pegar a nova URL após o clique
+    url_redirecionada = driver.current_url
+    # Imprimir a nova URL
+    print("URL Redirecionada:", url_redirecionada)
+    # Fechar o navegador após interação
+    driver.quit()
+    # Parseie a URL redirecionada
+    parsed_url = urlparse(url_redirecionada)
+
+    # Obtenha os parâmetros da query string da URL
+    query_params = parse_qs(parsed_url.query)
+
+    # Verifique se a chave 'code' existe nos parâmetros da query string
+    if 'code' in query_params:
+    # Acesse o valor associado à chave 'code'
+        code_value = query_params['code'][0]
+    return code_value
+
+# def get_token():
+#     # code = request.GET.get("code")
+#     # state = request.GET.get("state")
+#     CODE2 = authorize()
+#     client_credentials = f"{CLIENT_ID}:{CLIENT_SECRET}"
+#     credentials_bytes = client_credentials.encode("ascii")
+#     base64_bytes = base64.b64encode(credentials_bytes)
+#     base64_credentials = base64_bytes.decode("ascii")
+#     headers = {
+#         "Authorization": f"Basic {base64_credentials}"
+#     }
+#     url2 = f"https://api.contaazul.com/oauth2/token?grant_type=authorization_code&redirect_uri={REDIRECT_URI}&code={CODE2}"
+#     response = requests.post(url2, headers=headers)
+#     ACCESS_TOKEN = response.json()['access_token']
+#     return ACCESS_TOKEN
+
+
+# def get_sales():
+#         TOKEN = get_token() 
+#         HEADERS = {"Authorization": f"Bearer {TOKEN}"}
+#         SALES = '/v1/sales'
+#         response = requests.get(API_URL + SALES, headers=HEADERS)
+#         return print(response.json())
+
+# get_sales()
+
